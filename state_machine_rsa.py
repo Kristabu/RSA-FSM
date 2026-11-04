@@ -44,25 +44,29 @@ class Blakley_method:
             
 
         elif (self.state == BLAKLEY.LOOP1):
-            self.result = 2*self.result + kbit(self.a, self.k, self.counter1)*self.b
+            if self.counter1 >= self.k:
+                self.counter1 = 0
+                return BLAKLEY.OUT
 
+            self.result = 2*self.result + kbit(self.a, self.k, self.counter1)*self.b
+            print("R = ", self.result)
+            print("a_kbit * b = ", kbit(self.a, self.k, self.counter1)*self.b)
             self.counter1 += 1
             print(f'BLAKLEY LOOP1 iteration: {self.counter1}')
             
             return BLAKLEY.LOOP2
 
         elif (self.state == BLAKLEY.LOOP2):
-            self.counter2 += 1
-            print(f'BLAKLEY LOOP1 iteration: {self.counter1}')
+            #self.counter2 += 1
+            #print(f'BLAKLEY LOOP1 iteration: {self.counter1}')
             
             if self.result >= self.n:
                 self.result -= self.n
             if self.result >= self.n:
                 self.result -= self.n
+            print("R after n check = ", self.result)
             
-            if self.counter1 >= self.k:
-                self.counter1 = 0
-                return BLAKLEY.OUT
+
             return BLAKLEY.LOOP1
 
             
@@ -147,9 +151,9 @@ def main():
     success = 0
     task_RL = RL_method(Message=10, key=5, n=11)
     task_RL.waiting = True
-    task_Blakley = Blakley_method(A = 7, B = 5, n=11, k=len(bin(7)) - 2)
-
-    for i in range(100):
+    task_Blakley = Blakley_method(A = 7, B = 5, n=11, k=256)
+    print(len(bin(7)) - 2)
+    for i in range(612):
         # 1. Evaluate all FSMs using their current states
         #rl_next = task_RL.compute_next_state(blakley=task_Blakley)
         b_next = task_Blakley.compute_next_state(RL=task_RL)
@@ -161,7 +165,7 @@ def main():
         task_Blakley.state = b_next
 
         # 4. Wait until the next rising edge
-        time.sleep(clock_period)
+        time.sleep(clock_period/100)
 
 
 main()
